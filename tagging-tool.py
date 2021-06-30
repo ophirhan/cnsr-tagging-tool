@@ -140,7 +140,7 @@ class Window(QWidget):
         if self.filename != "":
             with open(self.filename.split('.')[0] + ".cnsr","w")as file:
                 for timestamp in self.timeStamps:
-                    file.write(timestamp[0] + " - " + timestamp[1] + " 1;\n")
+                    file.write(timestamp[0] + " - " + timestamp[1] + ";1 \n")
         exit()
 
     def open_file(self):
