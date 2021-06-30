@@ -4,8 +4,7 @@ import sys
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtGui import QIcon, QPalette
-from PyQt5.QtCore import Qt, QUrl
-
+from PyQt5.QtCore import Qt, QUrl, QTime
 
 
 class Window(QWidget):
@@ -13,11 +12,14 @@ class Window(QWidget):
         super().__init__()
 
         self.setWindowTitle("PyQt5 Media Player")
-        self.setGeometry(350, 100, 700, 500)
+        self.setGeometry(350, 300, 800, 500)
         self.setWindowIcon(QIcon('player.png'))
+        self.tagging = False
+        self.timeStamps = []
+        self.curTimeStamp = []
 
-        p =self.palette()
-        p.setColor(QPalette.Window, Qt.black)
+        p = self.palette()
+        p.setColor(QPalette.Window, Qt.gray )
         self.setPalette(p)
 
         self.init_ui()
@@ -49,11 +51,14 @@ class Window(QWidget):
         self.playBtn.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
         self.playBtn.clicked.connect(self.play_video)
 
+        self.tagBtn = QPushButton("Start Tagging")
+        self.tagBtn.setEnabled(True)
+        self.tagBtn.clicked.connect(self.tag_video)
 
 
         #create slider
         self.slider = QSlider(Qt.Horizontal)
-        self.slider.setRange(0,0)
+        self.slider.setRange(200,0)
         self.slider.sliderMoved.connect(self.set_position)
 
 
@@ -68,9 +73,11 @@ class Window(QWidget):
         hboxLayout.setContentsMargins(0,0,0,0)
 
         #set widgets to the hbox layout
+        hboxLayout.addWidget(self.tagBtn)
         hboxLayout.addWidget(openBtn)
         hboxLayout.addWidget(self.playBtn)
         hboxLayout.addWidget(self.slider)
+
 
 
 
@@ -92,6 +99,37 @@ class Window(QWidget):
         self.mediaPlayer.positionChanged.connect(self.position_changed)
         self.mediaPlayer.durationChanged.connect(self.duration_changed)
 
+    def tag_video(self):
+        if not self.tagging:
+            self.tagging = True
+            self.tagBtn.setText("Finish Tagging")
+            duration = self.mediaPlayer.duration()
+            timeStamp = self.get_time_format(duration)
+            self.curTimeStamp.append(timeStamp)
+        else:
+            self.tagging = False
+            self.tagBtn.setText("Start Tagging")
+            duration = self.mediaPlayer.duration()
+            timeStamp = self.get_time_format(duration)
+            self.curTimeStamp.append(timeStamp)
+
+    def get_time_format(self, duration):
+        timeStamp = ""
+        hours = int((duration / 3600000) % 24)
+        if hours // 10 == 0:
+            timeStamp += "0"
+        timeStamp += str(hours) + ":"
+        minutes = int((duration / 60000) % 60)
+        if minutes // 10 == 0:
+            timeStamp += "0"
+        timeStamp += str(minutes) + ":"
+        seconds = int((duration / 1000) % 60)
+        if seconds // 10 == 0:
+            timeStamp += "0"
+        timeStamp += str(seconds) + ","
+        milisec = int(duration % 1000)
+        timeStamp += str(milisec)
+        return timeStamp
 
     def open_file(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Open Video")
@@ -104,7 +142,6 @@ class Window(QWidget):
     def play_video(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()
-
         else:
             self.mediaPlayer.play()
 
