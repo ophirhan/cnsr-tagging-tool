@@ -114,7 +114,7 @@ class Window(QWidget):
             position = self.mediaPlayer.position()
             timeStamp = self.get_time_format(position)
             self.curTimeStamp.append(timeStamp)
-            print(self.curTimeStamp)
+            # print(self.curTimeStamp)
             self.timeStamps.append(self.curTimeStamp)
             self.curTimeStamp = []
 
