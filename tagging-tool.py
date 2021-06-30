@@ -17,6 +17,7 @@ class Window(QWidget):
         self.tagging = False
         self.timeStamps = []
         self.curTimeStamp = []
+        self.filename = ""
 
         p = self.palette()
         p.setColor(QPalette.Window, Qt.gray )
@@ -55,6 +56,9 @@ class Window(QWidget):
         self.tagBtn.setEnabled(True)
         self.tagBtn.clicked.connect(self.tag_video)
 
+        self.finishBtn = QPushButton("finish")
+        self.finishBtn.clicked.connect(self.finish_tagging)
+
 
         #create slider
         self.slider = QSlider(Qt.Horizontal)
@@ -77,9 +81,7 @@ class Window(QWidget):
         hboxLayout.addWidget(openBtn)
         hboxLayout.addWidget(self.playBtn)
         hboxLayout.addWidget(self.slider)
-
-
-
+        hboxLayout.addWidget(self.finishBtn)
 
         #create vbox layout
         vboxLayout = QVBoxLayout()
@@ -103,15 +105,18 @@ class Window(QWidget):
         if not self.tagging:
             self.tagging = True
             self.tagBtn.setText("Finish Tagging")
-            duration = self.mediaPlayer.duration()
-            timeStamp = self.get_time_format(duration)
+            position = self.mediaPlayer.position()
+            timeStamp = self.get_time_format(position)
             self.curTimeStamp.append(timeStamp)
         else:
             self.tagging = False
             self.tagBtn.setText("Start Tagging")
-            duration = self.mediaPlayer.duration()
-            timeStamp = self.get_time_format(duration)
+            position = self.mediaPlayer.position()
+            timeStamp = self.get_time_format(position)
             self.curTimeStamp.append(timeStamp)
+            print(self.curTimeStamp)
+            self.timeStamps.append(self.curTimeStamp)
+            self.curTimeStamp = []
 
     def get_time_format(self, duration):
         timeStamp = ""
@@ -131,11 +136,18 @@ class Window(QWidget):
         timeStamp += str(milisec)
         return timeStamp
 
-    def open_file(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Open Video")
+    def finish_tagging(self):
+        if self.filename != "":
+            with open(self.filename.split('.')[0] + ".cnsr","w")as file:
+                for timestamp in self.timeStamps:
+                    file.write(timestamp[0] + " - " + timestamp[1] + " 1;\n")
+        exit()
 
-        if filename != '':
-            self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(filename)))
+    def open_file(self):
+        self.filename, _ = QFileDialog.getOpenFileName(self, "Open Video")
+
+        if  self.filename != '':
+            self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(self.filename)))
             self.playBtn.setEnabled(True)
 
 
