@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QLabel, \
-    QSlider, QStyle, QSizePolicy, QFileDialog
+    QSlider, QStyle, QSizePolicy, QFileDialog ,QComboBox
 import sys
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -59,6 +59,12 @@ class Window(QWidget):
         self.finishBtn = QPushButton("finish")
         self.finishBtn.clicked.connect(self.finish_tagging)
 
+        self.box = QComboBox()
+        self.box.insertItem(0,"1")
+        self.box.insertItem(1,"2")
+        self.box.insertItem(2,"3")
+        self.box.insertItem(3,"4")
+
 
         #create slider
         self.slider = QSlider(Qt.Horizontal)
@@ -78,6 +84,7 @@ class Window(QWidget):
 
         #set widgets to the hbox layout
         hboxLayout.addWidget(self.tagBtn)
+        hboxLayout.addWidget(self.box)
         hboxLayout.addWidget(openBtn)
         hboxLayout.addWidget(self.playBtn)
         hboxLayout.addWidget(self.slider)
@@ -115,7 +122,7 @@ class Window(QWidget):
             timeStamp = self.get_time_format(position)
             self.curTimeStamp.append(timeStamp)
             # print(self.curTimeStamp)
-            self.timeStamps.append(self.curTimeStamp)
+            self.timeStamps.append(self.curTimeStamp + [self.box.currentIndex() + 1])
             self.curTimeStamp = []
 
     def get_time_format(self, duration):
@@ -140,7 +147,7 @@ class Window(QWidget):
         if self.filename != "":
             with open(self.filename.split('.')[0] + ".cnsr","w")as file:
                 for timestamp in self.timeStamps:
-                    file.write(timestamp[0] + " - " + timestamp[1] + ";1 \n")
+                    file.write(timestamp[0] + " - " + timestamp[1] + "; " + str(timestamp[2]) + "\n")
         exit()
 
     def open_file(self):
